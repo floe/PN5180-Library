@@ -27,6 +27,40 @@ PN5180ISO15693::PN5180ISO15693(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin)
 }
 
 /*
+ * GetRandomNumber, code=B2
+ *
+ * Request format: SOF, Req.Flags, GRN, MfgCode, UID (opt.), CRC16, EOF
+ * Response format: SOF, Resp.Flags, Random16, CRC16, EOF
+ *
+ */
+ISO15693ErrorCode PN5180ISO15693::getRandomNumber(uint16_t *rn) {
+  //                     Flags,  CMD, maskLen
+  uint8_t getrandom[] = { 0x02, 0xB2, 0x04, 0,0,0,0,0,0,0,0 };
+  //                        |\- high data rate
+  //                        \-- 1 slot: only one card, no AFI field present
+  PN5180DEBUG(F("Get Random Number...\n"));
+
+  *rn = 0;  
+  
+  uint8_t *readBuffer;
+  ISO15693ErrorCode rc = issueISO15693Command(getrandom, sizeof(getrandom), &readBuffer);
+  if (ISO15693_EC_OK != rc) {
+    return rc;
+  }
+
+  PN5180DEBUG(F("Response flags: "));
+  PN5180DEBUG(formatHex(readBuffer[0]));
+  
+  *rn = ((readBuffer[1] << 8) | readBuffer[2]);
+  PN5180DEBUG(formatHex(readBuffer[1])); // LSB comes first
+  PN5180DEBUG(formatHex(readBuffer[2])); // LSB comes first
+  
+  PN5180DEBUG("\n");
+
+  return ISO15693_EC_OK;
+}
+
+/*
  * Inventory, code=01
  *
  * Request format: SOF, Req.Flags, Inventory, AFI (opt.), Mask len, Mask value, CRC16, EOF

@@ -46,6 +46,7 @@ private:
 
 public:
   ISO15693ErrorCode getInventory(uint8_t *uid);
+  ISO15693ErrorCode getRandomNumber(uint16_t *rn);
 
   ISO15693ErrorCode readSingleBlock(uint8_t *uid, uint8_t blockNo, uint8_t *blockData, uint8_t blockSize);
   ISO15693ErrorCode writeSingleBlock(uint8_t *uid, uint8_t blockNo, uint8_t *blockData, uint8_t blockSize);
